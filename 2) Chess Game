@@ -1,0 +1,121 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+enum Color { WHITE, BLACK };
+
+class ChessPiece {
+protected:
+    Color color;
+    char symbol;
+public:
+    ChessPiece(Color c, char s) : color(c), symbol(s) {}
+    virtual ~ChessPiece() {}
+    Color getColor() { return color; }
+    char getSymbol() { return symbol; }
+    virtual bool isValidMove(int startRow, int startCol, int endRow, int endCol) = 0;
+};
+
+class Pawn : public ChessPiece {
+public:
+    Pawn(Color c) : ChessPiece(c, (c == WHITE) ? 'P' : 'p') {}
+    bool isValidMove(int startRow, int startCol, int endRow, int endCol) override {
+        if (color == WHITE) {
+            return (startCol == endCol && startRow - endRow == 1);
+        } else {
+            return (startCol == endCol && endRow - startRow == 1);
+        }
+    }
+};
+
+class Rook : public ChessPiece {
+public:
+    Rook(Color c) : ChessPiece(c, (c == WHITE) ? 'R' : 'r') {}
+    bool isValidMove(int startRow, int startCol, int endRow, int endCol) override {
+        return (startRow == endRow || startCol == endCol);
+    }
+};
+
+// Additional pieces (Knight, Bishop, Queen, King) can be added similarly
+
+class ChessBoard {
+private:
+    vector<vector<ChessPiece*>> board;
+public:
+    ChessBoard() {
+        board.resize(8, vector<ChessPiece*>(8, nullptr));
+        setupBoard();
+    }
+
+    ~ChessBoard() {
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                delete board[i][j];
+            }
+        }
+    }
+
+    void setupBoard() {
+        // Place Pawns
+        for (int i = 0; i < 8; ++i) {
+            board[1][i] = new Pawn(WHITE);
+            board[6][i] = new Pawn(BLACK);
+        }
+        // Place Rooks
+        board[0][0] = new Rook(WHITE); board[0][7] = new Rook(WHITE);
+        board[7][0] = new Rook(BLACK); board[7][7] = new Rook(BLACK);
+        // Add other pieces similarly
+    }
+
+    void display() {
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                if (board[i][j]) {
+                    cout << board[i][j]->getSymbol() << ' ';
+                } else {
+                    cout << ". ";
+                }
+            }
+            cout << endl;
+        }
+    }
+
+    bool movePiece(int startRow, int startCol, int endRow, int endCol) {
+        if (board[startRow][startCol] && board[startRow][startCol]->isValidMove(startRow, startCol, endRow, endCol)) {
+            delete board[endRow][endCol]; // Remove captured piece
+            board[endRow][endCol] = board[startRow][startCol];
+            board[startRow][startCol] = nullptr;
+            return true;
+        }
+        return false;
+    }
+};
+
+class ChessGame {
+private:
+    ChessBoard board;
+    Color turn;
+public:
+    ChessGame() : turn(WHITE) {}
+
+    void play() {
+        while (true) {
+            board.display();
+            cout << (turn == WHITE ? "White's turn: " : "Black's turn: ");
+            int startRow, startCol, endRow, endCol;
+            cin >> startRow >> startCol >> endRow >> endCol;
+            if (board.movePiece(startRow, startCol, endRow, endCol)) {
+                turn = (turn == WHITE) ? BLACK : WHITE;
+            } else {
+                cout << "Invalid move, try again." << endl;
+            }
+        }
+    }
+};
+
+int main() {
+    ChessGame game;
+    game.play();
+    return 0;
+}
