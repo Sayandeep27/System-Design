@@ -1,0 +1,73 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+// User class to represent a chat user
+class User {
+private:
+    string name;
+
+public:
+    User(const string &name) : name(name) {}
+
+    string getName() const {
+        return name;
+    }
+
+    void sendMessage(const string &message, User &receiver) {
+        receiver.receiveMessage(name, message);
+    }
+
+    void receiveMessage(const string &sender, const string &message) {
+        cout << sender << " to " << name << ": " << message << endl;
+    }
+};
+
+// ChatSystem class to manage users and messages
+class ChatSystem {
+private:
+    vector<User> users;
+
+public:
+    void addUser(const User &user) {
+        users.push_back(user);
+    }
+
+    void sendMessage(const string &senderName, const string &receiverName, const string &message) {
+        int senderIndex = -1, receiverIndex = -1;
+
+        // Find sender and receiver indexes
+        for (int i = 0; i < users.size(); ++i) {
+            if (users[i].getName() == senderName) {
+                senderIndex = i;
+            }
+            if (users[i].getName() == receiverName) {
+                receiverIndex = i;
+            }
+        }
+
+        // Send message if both users are found
+        if (senderIndex != -1 && receiverIndex != -1) {
+            users[senderIndex].sendMessage(message, users[receiverIndex]);
+        } else {
+            cout << "User not found!" << endl;
+        }
+    }
+};
+
+int main() {
+    ChatSystem chatSystem;
+
+    User user1("Alice");
+    User user2("Bob");
+
+    chatSystem.addUser(user1);
+    chatSystem.addUser(user2);
+
+    chatSystem.sendMessage("Alice", "Bob", "Hello, Bob!");
+    chatSystem.sendMessage("Bob", "Alice", "Hi, Alice!");
+
+    return 0;
+}
