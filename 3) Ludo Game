@@ -1,0 +1,78 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+class Player {
+private:
+    string name;
+    int position;
+
+public:
+    Player(const string &name) : name(name), position(0) {}
+
+    string getName() const {
+        return name;
+    }
+
+    int getPosition() const {
+        return position;
+    }
+
+    void move(int steps) {
+        position += steps;
+        if (position > 100) {
+            position = 100;
+        }
+    }
+
+    bool hasWon() const {
+        return position == 100;
+    }
+};
+
+class LudoGame {
+private:
+    vector<Player> players;
+
+public:
+    void addPlayer(const Player &player) {
+        players.push_back(player);
+    }
+
+    void play() {
+        srand(time(0));
+        bool gameWon = false;
+
+        while (!gameWon) {
+            for (auto &player : players) {
+                int diceRoll = (rand() % 6) + 1;
+                player.move(diceRoll);
+
+                cout << player.getName() << " rolled a " << diceRoll << " and moved to position " << player.getPosition() << endl;
+
+                if (player.hasWon()) {
+                    cout << player.getName() << " has won the game!" << endl;
+                    gameWon = true;
+                    break;
+                }
+            }
+        }
+    }
+};
+
+int main() {
+    LudoGame game;
+
+    Player player1("Alice");
+    Player player2("Bob");
+
+    game.addPlayer(player1);
+    game.addPlayer(player2);
+
+    game.play();
+
+    return 0;
+}
